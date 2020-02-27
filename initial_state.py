@@ -6,9 +6,7 @@ Team 6
 Colin Moody, Ohad Beck, Charlie MacVicar, Jake Boersma
 
 """
-import re
 import string
-from collections import namedtuple
 from openpyxl import load_workbook
 
 def create_resource_dict():
@@ -44,6 +42,9 @@ def create_country_dict():
             resrc_key = get_val(country_sheet, col_letter(col), 1)
             resrc_value = get_val(country_sheet, col_letter(col), row)
             resrc_dict[resrc_key] = resrc_value
+        resrc_dict["R21'"] = 0
+        resrc_dict["R22'"] = 0
+        resrc_dict["R23'"] = 0
         country_dict[key] = resrc_dict
     return country_dict
 
