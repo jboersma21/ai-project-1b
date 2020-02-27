@@ -15,16 +15,16 @@ import Country
 class World:
 
     def __init__(self, d_bound, weight_dict, country_dict):
-        self.num_country = len(country_dict)  # number of countries in the world
-        self.d_bound = d_bound  # deepest level at which successors are generated
-        self.weights = weight_dict  # resources and their corresponding weights
-        self.countries = {}  # dictionary of country objects
+        self.num_country = len(country_dict)                                # number of countries in the world
+        self.d_bound = d_bound                                              # deepest level at which successors are generated
+        self.weights = weight_dict                                          # resources and their corresponding weights
+        self.countries = {}                                                 # dictionary of country objects
 
         for country in country_dict:
             name = country
-            resources = country_dict[country]  # resources for specific country
-            new_country = Country.Country(name, resources, weight_dict)  # create country object with name and resources
-            self.countries[name] = new_country  # add country object to countries dictionary
+            resources = country_dict[country]                               # resources for specific country
+            new_country = Country.Country(name, resources, weight_dict)     # create country object with name and resources
+            self.countries[name] = new_country                              # add country object to countries dictionary
 
     def print_search_state(self):
         for country in self.countries:
