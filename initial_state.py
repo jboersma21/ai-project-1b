@@ -9,6 +9,8 @@ Colin Moody, Ohad Beck, Charlie MacVicar, Jake Boersma
 import string
 from openpyxl import load_workbook
 
+DATA_FILE = 'data/Initial-World.xlsx'
+
 
 def create_resource_dict():
     """
@@ -16,7 +18,7 @@ def create_resource_dict():
     Keys: name of resource
     Values: weight of corresponding resource
     """
-    wb = load_workbook('data/Initial-World-1.xlsx')
+    wb = load_workbook(DATA_FILE)
     resources_sheet = wb.get_sheet_by_name('Resources')
     resource_dict = {}
     for row in range(2, resources_sheet.max_row + 1):
@@ -32,7 +34,7 @@ def create_country_dict():
     Keys: name of country
     Values: dictionary where key = resource_name and value = resource_amount
     """
-    wb = load_workbook('data/Initial-World-1.xlsx')
+    wb = load_workbook(DATA_FILE)
     country_sheet = wb.get_sheet_by_name('Countries')
     country_dict = {}
     for row in range(2, country_sheet.max_row + 1):
