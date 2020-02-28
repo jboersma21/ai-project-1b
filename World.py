@@ -12,7 +12,9 @@ import initial_state
 import Country
 import numpy as np
 from scipy.stats import variation
+from copy import deepcopy
 
+from config import configuration
 
 
 def gini_index(np_arr):
@@ -55,20 +57,22 @@ def gini_2(x):
     return g
 
 
-
-class World:
+class World(object):
 
     def __init__(self, d_bound, weight_dict, country_dict):
-        self.num_country = len(country_dict)  # number of countries in the world
-        self.d_bound = d_bound  # deepest level at which successors are generated
-        self.weights = weight_dict  # resources and their corresponding weights
-        self.countries = {}  # dictionary of country objects
+        self.num_country = len(country_dict)    # number of countries in the world
+        self.d_bound = d_bound                  # deepest level at which successors are generated
+        self.weights = weight_dict              # resources and their corresponding weights
+        self.countries = {}                     # dictionary of country objects
 
         for country in country_dict:
             name = country
             resources = country_dict[country]  # resources for specific country
             new_country = Country.Country(name, resources, weight_dict)  # create country object with name and resources
             self.countries[name] = new_country  # add country object to countries dictionary
+
+    def get_deep_copy(self):
+        return deepcopy(self)
 
     def print_search_state(self):
         for country in self.countries:
@@ -85,6 +89,41 @@ class World:
 
         return np.array(u_lst)
 
+    def transfer(self, exporter, destination, resource):
+        if self.countries[exporter].resources[resource] < 1.0:
+            return False
+        self.countries[exporter].resources[resource] -= 1.0
+        self.countries[exporter].resources[resource] += 1.0
+        return True
+
+    def get_big_u(self):
+        # to-do: add gini computation (boersma)
+        return 0
+
+
+def generate_successor(current_state):
+    successors = list()
+
+    # 1. Add every transformation for every country
+    for country in current_state.countries.keys():
+        for operator in configuration["transformations"]:
+            # add state: transformation t applied to country c (if valid preconditions)
+            tmp_world = current_state.get_deep_copy()
+            if tmp_world.countries[country].transform(transformation=operator):
+                successors.append((tmp_world, tmp_world.get_big_u()))
+
+    # 2. Add every transfer for every pair of countries (both ways)
+    for exporter in current_state.countries.keys():
+        for destination in current_state.countries.keys():
+            if exporter != destination:
+                for resource in configuration["resources"]:
+                    # add state: r transferred from c1 to c2 (if valid preconditions)
+                    tmp_world = current_state.get_deep_copy()
+                    if tmp_world.transfer(exporter=exporter, destination=destination, resource=resource):
+                        successors.append((tmp_world, tmp_world.get_big_u()))
+
+    return successors
+
 
 def main(argv):
     weights = initial_state.create_resource_dict()
@@ -93,7 +132,7 @@ def main(argv):
     countries = initial_state.create_country_dict()
     print(countries)
 
-    d_bound = 3
+    d_bound = 3     # to-do: make global class var
 
     new_world = World(d_bound, weights, countries)
     # print(new_world.weights)
@@ -107,8 +146,9 @@ def main(argv):
     lu = new_world.little_u_array()
     print(gini_index(lu))
     print(gini_1(lu))
-    
 
+    successors = generate_successor(new_world)
+    print len(successors)
 
 
 if __name__ == "__main__":

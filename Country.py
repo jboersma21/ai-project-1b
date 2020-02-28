@@ -6,11 +6,11 @@ Team 6
 Colin Moody, Ohad Beck, Charlie MacVicar, Jake Boersma
 
 """
-
 import sys
+from config import configuration
 
 
-class Country:
+class Country(object):
 
     def __init__(self, name, resource_dict, weight_dict):
         self.name = name                          # country name
@@ -26,8 +26,20 @@ class Country:
 
         waste_val = (-self.weights["R21'"]*self.resources["R21'"]) - (self.weights["R22'"]*self.resources["R22'"]) - (-self.weights["R23'"]*self.resources["R23'"])
 
-        little_util = housing_val + alloy_val + electronics_val + waste_val
-        return little_util
+        return housing_val + alloy_val + electronics_val + waste_val
+
+    def transform(self, transformation):
+        used = dict()
+        for resource, amount in configuration[transformation]["in"].items():
+            if self.resources[resource] < amount:
+                return False
+            used[resource] = amount
+        for resource, amount in used.items():
+            self.resources[resource] -= amount
+        for resource, amount in configuration[transformation]["out"].items():
+            self.resources[resource] += amount
+        return True
+
 
 def main(argv):
     print("")
