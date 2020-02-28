@@ -12,13 +12,13 @@ from openpyxl import load_workbook
 DATA_FILE = 'data/Initial-World.xlsx'
 
 
-def create_resource_dict():
+def create_resource_dict(file_name=DATA_FILE):
     """
     Creates a dictionary containing resource and weight info.
     Keys: name of resource
     Values: weight of corresponding resource
     """
-    wb = load_workbook(DATA_FILE)
+    wb = load_workbook(file_name)
     resources_sheet = wb.get_sheet_by_name('Resources')
     resource_dict = {}
     for row in range(2, resources_sheet.max_row + 1):
@@ -28,13 +28,13 @@ def create_resource_dict():
     return resource_dict
 
 
-def create_country_dict():
+def create_country_dict(file_name=DATA_FILE):
     """
     Creates a dictionary containing country info.
     Keys: name of country
     Values: dictionary where key = resource_name and value = resource_amount
     """
-    wb = load_workbook(DATA_FILE)
+    wb = load_workbook(file_name)
     country_sheet = wb.get_sheet_by_name('Countries')
     country_dict = {}
     for row in range(2, country_sheet.max_row + 1):
@@ -74,3 +74,7 @@ def print_country_dict(dic):
         print(key)
         for key2 in dic2:
             print('\t' + key2, dic2[key2])
+
+
+if __name__ == '__main__':
+    print create_country_dict()
