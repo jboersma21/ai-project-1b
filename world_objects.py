@@ -19,6 +19,10 @@ class World(object):
             new_country = Country(name, resources, weight_dict)  # create country object with name and resources
             self.countries[name] = new_country  # add country object to countries dictionary
 
+    def __lt__(self, other):
+        # referenced from group 7
+        return self.get_big_u() > other.get_big_u()
+
     def get_deep_copy(self):
         return deepcopy(self)
 
