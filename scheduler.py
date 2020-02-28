@@ -13,20 +13,25 @@ class WorldStateManager(object):
     def __init__(self, depth_bound, initial_resources, initial_countries):
         self.cur_state = World(d_bound=depth_bound, weight_dict=initial_resources, country_dict=initial_countries)
         self.future_states = list()    # priority queue that store states based on big-u
-        self.prev_states = list()      # stack of explored states (i.e. trajectory so far)
+        self.prev_states = list()      # stack of explored state big-Us
+        self.depth = 0
 
     # unfinished depth-bound search algorithm
     def execute_search(self):
-        while self.cur_state not in self.prev_states:
+        self.print_cur_state_info()
+        while self.cur_state.get_big_u() not in self.prev_states:
             self.go_to_next_state()
+            self.print_cur_state_info()
             # to-do: add depth-bounded logic
 
     def go_to_next_state(self):
+        self.future_states = list()                         # clear old list of successors?
         for world in generate_successors(self.cur_state):
             self.add_future_state(world_state=world)
         # self.add_future_state(self.cur_state)
-        self.prev_states.append(self.cur_state)
+        self.prev_states.append(self.cur_state.get_big_u())
         self.cur_state = self.pop_future_state()
+        self.depth += 1
 
     def add_future_state(self, world_state):
         heapq.heappush(self.future_states, (world_state.get_big_u(), world_state))
@@ -35,10 +40,13 @@ class WorldStateManager(object):
     def pop_future_state(self):
         return heapq.heappop(self.future_states)[1]
 
-    def print_state_info(self):
-        print('Current State: {}\t{}'.format(self.cur_state, self.cur_state.get_big_u()))
-        print('Future States: {}'.format(self.future_states))
-        print('Prev States: {}'.format(self.prev_states))
+    def print_cur_state_info(self):
+        if self.depth > 0:
+            print('\t-> Operator: {}'.format(self.cur_state.prev_op))
+        print('State {}:\t{}'.format(self.depth, self.get_cur_big_u()))
+
+    def get_cur_big_u(self):
+        return self.cur_state.get_big_u()
 
 
 def generate_successors(current_state):
@@ -48,8 +56,14 @@ def generate_successors(current_state):
     for country in current_state.countries.keys():
         for operator in configuration["transformations"]:
             tmp_world = current_state.get_deep_copy()
-            if tmp_world.countries[country].transform(transformation=operator):
+            bins = 1
+            while tmp_world.countries[country].transform(transformation=operator, bins=bins):
+                ins = [i * bins for i in configuration[operator]["in"].values()]
+                outs = [i * bins for i in configuration[operator]["out"].values()]
+                tmp_world.set_prev_op('{} (in={} out={}) (bins={})'.format(operator, ins, outs, bins))
                 successors.append(tmp_world)
+                bins += 1
+                tmp_world = current_state.get_deep_copy()
 
     # Add every transfer for every pair of countries (both ways)
     for exporter in current_state.countries.keys():
@@ -57,8 +71,13 @@ def generate_successors(current_state):
             if exporter != destination:
                 for resource in configuration["resources"]:
                     tmp_world = current_state.get_deep_copy()
-                    if tmp_world.transfer(exporter=exporter, destination=destination, resource=resource):
+                    bins = 1
+                    while tmp_world.transfer(exporter=exporter, destination=destination, resource=resource, bins=bins):
+                        tmp_world.set_prev_op('{} (from={} to={} resource={} amount={})'
+                                              ''.format('transfer', exporter, destination, resource, bins))
                         successors.append(tmp_world)
+                        bins += 1
+                        tmp_world = current_state.get_deep_copy()
 
     return successors
 
@@ -74,6 +93,8 @@ def output_successors_to_excel(file_name, successors):
     cur_col = 1
 
     for idx, state in enumerate(successors):
+        if idx > 9:     # only print first 10 successors
+            break
         ws.cell(row=cur_row, column=cur_col).value = 'Successor'
         cur_col += 1
         ws.cell(row=cur_row, column=cur_col).value = idx + 1
@@ -81,6 +102,10 @@ def output_successors_to_excel(file_name, successors):
         ws.cell(row=cur_row, column=cur_col).value = 'Big-U'
         cur_col += 1
         ws.cell(row=cur_row, column=cur_col).value = state.get_big_u()
+        cur_col += 2
+        ws.cell(row=cur_row, column=cur_col).value = 'Prev Op'
+        cur_col += 1
+        ws.cell(row=cur_row, column=cur_col).value = state.prev_op
 
         cur_row += 1
         cur_col = 1
@@ -113,10 +138,14 @@ def run_successor_test(file_name):
                                          initial_countries=data_import.create_country_dict(file_name=file_name))
     output_successors_to_excel(file_name=file_name, successors=generate_successors(my_state_manager.cur_state))
 
+    print('\nExample DFS Search on {}:'.format(file_name))
+    my_state_manager.execute_search()
+    print('\n')
+
 
 def main(argv):
-    for f_name in ['data/Initial-World-Test1.xlsx']:
-        run_successor_test(f_name)
+    for name in ['Test1', 'Test2', 'Test3']:
+        run_successor_test(file_name='data/Initial-World-{}.xlsx'.format(name))
 
 
 if __name__ == "__main__":

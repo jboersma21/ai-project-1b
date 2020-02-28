@@ -11,6 +11,7 @@ class World(object):
         self.d_bound = d_bound                  # deepest level at which successors are generated
         self.weights = weight_dict              # resources and their corresponding weights
         self.countries = {}                     # dictionary of country objects
+        self.prev_op = None                     # store previous operation details
 
         for country in country_dict:
             name = country
@@ -36,17 +37,21 @@ class World(object):
 
         return np.array(u_lst)
 
-    def transfer(self, exporter, destination, resource):
-        if self.countries[exporter].resources[resource] < 1.0:
+    def transfer(self, exporter, destination, resource, bins=1):
+        available = self.countries[exporter].resources[resource]
+        if (available < bins and resource != "R1") or available <= bins:    # avoid exporting entire population
             return False
-        self.countries[exporter].resources[resource] -= 1.0
-        self.countries[destination].resources[resource] += 1.0
+        self.countries[exporter].resources[resource] -= bins
+        self.countries[destination].resources[resource] += bins
         return True
 
     def get_big_u(self):
         u_array = self.little_u_array()
         sum_u = np.sum(u_array)  # sum of per-capita little-u
         return sum_u / gini_index(u_array)
+
+    def set_prev_op(self, details):
+        self.prev_op = details
 
 
 # Represents an individual country
@@ -66,14 +71,15 @@ class Country(object):
         population = self.resources['R1']
         return (housing_val + alloy_val + electronics_val + waste_val) / population
 
-    def transform(self, transformation):
+    def transform(self, transformation, bins=1):
         used = dict()
         for resource, amount in configuration[transformation]["in"].items():
+            amount *= bins
             if self.resources[resource] < amount:
                 return False
             used[resource] = amount
         for resource, amount in used.items():
             self.resources[resource] -= amount
         for resource, amount in configuration[transformation]["out"].items():
-            self.resources[resource] += amount
+            self.resources[resource] += amount * bins
         return True
