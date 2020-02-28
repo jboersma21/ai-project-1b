@@ -76,7 +76,7 @@ def output_successors_to_excel(file_name, successors):
     for idx, state in enumerate(successors):
         ws.cell(row=cur_row, column=cur_col).value = 'Successor'
         cur_col += 1
-        ws.cell(row=cur_row, column=cur_col).value = idx
+        ws.cell(row=cur_row, column=cur_col).value = idx + 1
         cur_col += 2
         ws.cell(row=cur_row, column=cur_col).value = 'Big-U'
         cur_col += 1
