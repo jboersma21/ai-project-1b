@@ -61,16 +61,16 @@ def get_val(sheet, col, row):
     return sheet[col + str(row)].value
 
 
-def print_resource_dict(dict):
+def print_resource_dict(dic):
     """Prints a resource dictionary's key and values line by line."""
-    for key in dict:
-        print(key, dict[key])
+    for key in dic:
+        print(key, dic[key])
 
 
-def print_country_dict(dict):
+def print_country_dict(dic):
     """Prints a country dictionary's key and values line by line."""
-    for key in dict:
-        dict2 = dict[key]
+    for key in dic:
+        dic2 = dic[key]
         print(key)
-        for key2 in dict2:
-            print('\t' + key2, dict2[key2])
+        for key2 in dic2:
+            print('\t' + key2, dic2[key2])
