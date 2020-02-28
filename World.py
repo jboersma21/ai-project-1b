@@ -104,20 +104,18 @@ class World(object):
 def generate_successor(current_state):
     successors = list()
 
-    # 1. Add every transformation for every country
+    # Add every transformation for every country
     for country in current_state.countries.keys():
         for operator in configuration["transformations"]:
-            # add state: transformation t applied to country c (if valid preconditions)
             tmp_world = current_state.get_deep_copy()
             if tmp_world.countries[country].transform(transformation=operator):
                 successors.append((tmp_world, tmp_world.get_big_u()))
 
-    # 2. Add every transfer for every pair of countries (both ways)
+    # Add every transfer for every pair of countries (both ways)
     for exporter in current_state.countries.keys():
         for destination in current_state.countries.keys():
             if exporter != destination:
                 for resource in configuration["resources"]:
-                    # add state: r transferred from c1 to c2 (if valid preconditions)
                     tmp_world = current_state.get_deep_copy()
                     if tmp_world.transfer(exporter=exporter, destination=destination, resource=resource):
                         successors.append((tmp_world, tmp_world.get_big_u()))
