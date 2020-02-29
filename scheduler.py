@@ -26,18 +26,18 @@ class WorldStateManager(object):
 
     def go_to_next_state(self):
         self.future_states = list()                         # clear old list of successors?
-        for world in generate_successors(self.cur_state):
+        successors = generate_successors(self.cur_state)
+        for world in successors:
             self.add_future_state(world_state=world)
-        # self.add_future_state(self.cur_state)
         self.prev_states.append(self.cur_state.get_big_u())
         self.cur_state = self.pop_future_state()
         self.depth += 1
 
     def add_future_state(self, world_state):
         heapq.heappush(self.future_states, (world_state.get_big_u(), world_state))
-        self.future_states.sort(reverse=True)
 
     def pop_future_state(self):
+        self.future_states.sort(reverse=True)
         return heapq.heappop(self.future_states)[1]
 
     def print_cur_state_info(self):
