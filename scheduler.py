@@ -34,10 +34,9 @@ class WorldStateManager(object):
         self.depth += 1
 
     def add_future_state(self, world_state):
-        heapq.heappush(self.future_states, (world_state.get_big_u(), world_state))
+        heapq.heappush(self.future_states, (world_state.get_big_u() * -1, world_state))
 
     def pop_future_state(self):
-        self.future_states.sort(reverse=True)
         return heapq.heappop(self.future_states)[1]
 
     def print_cur_state_info(self):
