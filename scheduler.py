@@ -26,8 +26,7 @@ class WorldStateManager(object):
 
     def go_to_next_state(self):
         self.future_states = list()                         # clear old list of successors?
-        successors = generate_successors(self.cur_state)
-        for world in successors:
+        for world in generate_successors(self.cur_state):
             self.add_future_state(world_state=world)
         self.prev_states.append(self.cur_state.get_big_u())
         self.cur_state = self.pop_future_state()
@@ -137,13 +136,13 @@ def run_successor_test(file_name):
                                          initial_countries=data_import.create_country_dict(file_name=file_name))
     output_successors_to_excel(file_name=file_name, successors=generate_successors(my_state_manager.cur_state))
 
-    print('\nExample DFS Search on {}:'.format(file_name))
+    print('\nExample Search on {}:'.format(file_name))
     my_state_manager.execute_search()
     print('\n')
 
 
 def main(argv):
-    for name in ['Test1', 'Test2', 'Test3']:
+    for name in ['Test1', 'Test2', 'Test3', 'Test4']:
         run_successor_test(file_name='data/Initial-World-{}.xlsx'.format(name))
 
 
