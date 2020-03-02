@@ -77,4 +77,4 @@ def print_country_dict(dic):
 
 
 if __name__ == '__main__':
-    print create_country_dict()
+    print(create_country_dict())
